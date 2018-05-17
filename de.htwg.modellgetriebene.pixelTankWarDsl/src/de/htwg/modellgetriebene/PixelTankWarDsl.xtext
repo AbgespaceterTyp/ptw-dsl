@@ -1,0 +1,38 @@
+grammar de.htwg.modellgetriebene.PixelTankWarDsl with org.eclipse.xtext.common.Terminals
+
+generate pixelTankWarDsl "http://www.htwg.de/modellgetriebene/PixelTankWarDsl"
+
+Model:
+	// Ohne Stern, da nur ein Battlefield
+	game=Game;
+	
+Game:
+	'Create' Battlefield;
+	
+Battlefield:
+	'Battlefield' (battlefield=ID & 'size' dimesion=Dimension & 'background' background=Background) & 
+	'place' 
+		('Player' playerOne=Player)
+		('Player' playerTwo=Player)
+		('Player' playerThree=Player)?
+		('Player' playerFour=Player)?
+		('Block' blocks+=Block)* ;
+
+Player: 
+	name=ID 'color' color=Color 'at' location=Location;
+
+Block: blockType=BlockType 'at' location=Location;
+
+enum BlockType: WOOD | MOUNTAIN | LAKE | CITY;
+
+Location: xPosition=INT yPosition=INT;
+
+Dimension:
+	(width=INT'x'height=INT);
+
+enum Color: 
+	RED | BLUE | PURPLE | BROWN;
+
+enum Background:
+	FOREST | DESERT | MOUNTAINS;
+	

@@ -24,3 +24,16 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+### Xtext ###
+bin
+target
+generated
+generated-sources
+src-gen
+xtend-gen
+.antlr-generator-*.jar
+.DS_Store
+*.java._trace
+*.java_trace
+*.smap
