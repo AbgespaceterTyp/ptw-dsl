@@ -3,6 +3,8 @@
  */
 package de.htwg.modellgetriebene.generator
 
+import de.htwg.modellgetriebene.pixelTankWarDsl.Battlefield
+import de.htwg.modellgetriebene.pixelTankWarDsl.Player
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
@@ -16,10 +18,17 @@ import org.eclipse.xtext.generator.IGeneratorContext
 class PixelTankWarDslGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(Greeting)
-//				.map[name]
-//				.join(', '))
+		fsa.generateFile(generateFileName(resource), generateContent(resource));
+	}
+	
+	def generateContent(Resource resource){
+		"test"
+	}
+	
+	/**
+	 * Generates a file name for pattern 'G_ScenarioName_(PlayerCount-Player).json'
+	 */
+	def generateFileName(Resource resource){
+		"G_" + resource.allContents.filter(Battlefield).head.battlefield + "_(" + resource.allContents.filter(Player).size + "-Player).json"
 	}
 }
