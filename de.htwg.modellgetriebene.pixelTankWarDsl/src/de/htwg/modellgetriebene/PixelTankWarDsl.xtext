@@ -47,8 +47,8 @@ Player:
 		'named' name=ID
 		'withTank' tankType=TankType
 		'andColor' color=Color
-		'andForce' actionPoints=INT
-		'andHealth' healthPoints=INT
+		'andActionPoints' actionPoints=INT
+		'andHealthPoints' healthPoints=INT
 		'whoStartsAtPosition' location=Location
 		'towards' startDirection=Direction
 		'withActions' playerActions=PlayerActions

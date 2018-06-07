@@ -15,20 +15,35 @@ import de.htwg.modellgetriebene.pixelTankWarDsl.PixelTankWarDslPackage
  */
 class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 	
-	// public static val INVALID_NAME = 'invalidName'
 	public static val DUPLICATE_NAME = 'duplicateName'
 	public static val DUPLICATE_COLOR = 'duplicateColor'
-	// public static val DUPLICATE_COLOR = 'duplicateColor'
+	public static val HEALTH_POINTS_BELOW_ONE = 'healthPointsBelowOne'
+	public static val HEALTH_POINTS_TOO_HIGH = 'healthPointsTooHigh'
+	public static val ACTION_POINTS_BELOW_ONE = 'actionPointsBelowOne'
+	public static val ACTION_POINTS_TOO_HIGH = 'actionPointsTooHigh'
+	public static val LOCATION_OUT_OF_BOUNDS = 'locationOutOfBounds'
+	public static val DUPLICATE_LOCATION = 'duplicateLocation'
+	//public static val AAAAA = 'Aaaaa'
+	//public static val AAAAA = 'Aaaaa'
 
+	
 	public var Battlefield battlefield
 
 	@Check
 	def checkAndLoadBattlefield(Battlefield bf) {
-		battlefield = bf	
+		battlefield = bf
+		
+		// TODO Pruefung aller locations auf uniqueness
+		val playersLocations = battlefield.players.players.map[p1 | return p1.location]
+		val blocksLocations = battlefield.blocks.blocks.map[b1 | return b1.location]
+		
+		val allLocations = playersLocations.clone
+		allLocations.addAll(blocksLocations)
+		
 	}
 
 	@Check
-	def checkPlayerNameNotEmpty(Player player) {
+	def checkPlayer(Player player) {
 		battlefield.players.players
 			.groupBy[name]
 			.forEach[p1, p2| 
@@ -44,6 +59,41 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 				error("Color should be unique", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)	
 			}
 		];
+		
+		battlefield.players.players
+			.forEach[p1| 
+			if(player != p1 && player.location.XPosition === (p1.location.XPosition) && player.location.YPosition === (p1.location.YPosition)) { 
+				error("Position should be unique", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, DUPLICATE_LOCATION)
+			}
+		];
+		
+		
+		
+		if(player.healthPoints < 1) {
+			error("Health points must not be below 1", PixelTankWarDslPackage.Literals.PLAYER__HEALTH_POINTS, HEALTH_POINTS_BELOW_ONE)	
+		}
+		
+		if(player.healthPoints > 10) {
+			warning("Health points should be between 1 and 10, otherwise the game takes a long time to finish", PixelTankWarDslPackage.Literals.PLAYER__HEALTH_POINTS, HEALTH_POINTS_TOO_HIGH)
+		}
+		
+		if(player.actionPoints < 1) {
+			error("Action points must not be below 1", PixelTankWarDslPackage.Literals.PLAYER__ACTION_POINTS, ACTION_POINTS_BELOW_ONE)
+		}
+		
+		if(player.actionPoints > 10) {
+			warning("Action points should be between 1 and 10, otherwise the game takes a long time to finish", PixelTankWarDslPackage.Literals.PLAYER__ACTION_POINTS, ACTION_POINTS_TOO_HIGH)	
+		}
+		
+		if(player.location.XPosition === 0 || player.location.XPosition > battlefield.dimesion.width) {
+			error("X-Position has to be greater than 0 and within the battlefields width dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		}
+		
+		if(player.location.YPosition === 0 || player.location.YPosition > battlefield.dimesion.height) {
+			error("Y-Position has to be greater than 0 and within the battlefields height dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		}
+		
+		
 	}
 	
 	@Check
