@@ -9,8 +9,6 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import de.htwg.modellgetriebene.pixelTankWarDsl.Block
-import javax.swing.Action
 
 /**
  * Generates code from your model files on save.
@@ -20,6 +18,7 @@ import javax.swing.Action
 class PixelTankWarDslGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
+		// TODO iterate over battlefields and create for each an own file
 		fsa.generateFile(generateFileName(resource), generateContent(resource));
 	}
 	
@@ -36,18 +35,18 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		"\"rowCount\": " + battlefield.dimesion.width + "," +
 		"\"colCount\": " + battlefield.dimesion.height + "," +
 		"\"blockObjects\": [" +
-		// TODO blocks
-		"]," +
+			blockToJson(battlefield) +
+		"]" +
 		"\"playerObjects\": [" +
-		// TODO players
-		"]," +
+			playerToJson(battlefield) +
+		"]" +
 		"\"actions\": [" +
-		// TODO actons
-		"]," +
+			actionToJson(battlefield) +
+		"]" +
 		"}"
 	}
 	
-	def blockToJson(Block block){
+	def blockToJson(Battlefield battlefield){
 		"{" +
       	"\"name\": \"B\"," +
       	"\"imagePath\": \"images/block_wood.png\"," +
@@ -58,7 +57,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
     	"},"
 	}
 	
-	def playerToJson(Player player){
+	def playerToJson(Battlefield battlefield){
 		"{" +
       	"\"name\": \"Spieler 1\"," +
       	"\"imagePath\": \"images/light_tank_red.png\"," +
@@ -82,10 +81,10 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
           	"\"id\": 4" +
         "}" +
       	"]" +
-    	"},\""
+    	"},"
 	}
 	
-	def actionToJson(Action action){
+	def actionToJson(Battlefield battlefield){
 		"{" +
       	"\"id\": 1," +
       	"\"description\": \"Panzer bewegen\"," +
@@ -95,7 +94,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
       	"\"range\": 1," +
       	"\"actionType\": 1," +
       	"\"damage\": 0" +
-    "},"
+    	"},"
 	}
 	
 	/**
