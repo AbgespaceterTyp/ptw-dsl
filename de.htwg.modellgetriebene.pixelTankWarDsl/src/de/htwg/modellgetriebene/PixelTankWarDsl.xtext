@@ -10,29 +10,69 @@ Game:
 	'Create' Battlefield;
 	
 Battlefield:
-	'Battlefield' (battlefield=ID & 'size' dimesion=Dimension & 'background' background=Background) & 
-	'place' 
-		('Player' playerOne=Player)
-		('Player' playerTwo=Player)
-		('Player' playerThree=Player)?
-		('Player' playerFour=Player)?
-		('Block' blocks+=Block)* ;
+	'Battlefield' battlefield=ID '{'
+		& 'size' dimesion=Dimension
+		& 'background' background=Background 
+		& 'placeOnField' '{'
+			players=Players
+			blocks=Blocks
+		'}'
+		& 'defineActions' '{'
+			action=Action
+		'}'
+	'}';
+	
 
-Player: 
-	name=ID 'color' color=Color 'at' location=Location;
-
-Block: blockType=BlockType 'at' location=Location;
-
-enum BlockType: WOOD | MOUNTAIN | LAKE | CITY | CITY_DESERT | HELICOPTER | DUNE | PALM;
+// Battlefield attributes
 
 Location: xPosition=INT yPosition=INT;
 
 Dimension:
 	(width=INT'x'height=INT);
 
+enum Direction: NORTH | EAST | SOUTH | WEST;
+
 enum Color: 
 	RED | BLUE | PURPLE | BROWN;
 
 enum Background:
-	FOREST | DESERT | MOUNTAINS;
+	FORREST | DESERT | MOUNTAINS;
+
+
+// Player
+
+Players:
+	('Player' playerOne=Player) &
+	('Player' playerTwo=Player) &
+	('Player' playerThree=Player)? &
+	('Player' playerFour=Player)?;
+
+Player: 
+	name=ID '{'
+		'withColor' color=Color
+		'andForce' actionPoints=INT
+		'andHealth' healthPoints=INT
+		'at' location=Location
+		'startsTo' startDirection=Direction
+		'hasActions' playerActions=PlayerActions
+		'}';
+
+PlayerActions: {PlayerActions} (playerActions+=ActionType)*;
+
+
+// Blocks
 	
+Blocks: {Blocks} ('Block' blocks+=Block)*;
+
+Block: blockType=BlockType 'at' location=Location;
+
+enum BlockType: WOOD | MOUNTAIN | LAKE | CITY | CITY_DESERT | HELICOPTER | DUNE | PALM;
+
+
+// Actions
+
+Action: {Action} (action+=ActionComponents)*;
+
+ActionComponents: actionType=ActionType costs=INT range=INT damage=INT;
+	
+enum ActionType: MOVE | SHOOT | ROCKET | WAIT;
