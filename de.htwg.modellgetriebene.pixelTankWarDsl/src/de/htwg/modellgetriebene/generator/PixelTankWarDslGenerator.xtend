@@ -9,6 +9,8 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import de.htwg.modellgetriebene.pixelTankWarDsl.Block
+import javax.swing.Action
 
 /**
  * Generates code from your model files on save.
@@ -22,7 +24,78 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 	}
 	
 	def generateContent(Resource resource){
-		"test"
+		battlefieldToJson(resource.allContents.filter(Battlefield).head)
+	}
+	
+	def battlefieldToJson(Battlefield battlefield){
+		"{" + 
+		"\"attackSoundPath\": \"sounds/explosion.wav\"," +
+ 		"\"levelBackgroundImagePath\": \"images/background_woodlands.png\"," +
+		"\"actionbarBackgroundImagePath\": \"images/background_actionbar.png\"," +
+		"\"attackImagePath\": \"images/hit.png\"," +
+		"\"rowCount\": " + battlefield.dimesion.width + "," +
+		"\"colCount\": " + battlefield.dimesion.height + "," +
+		"\"blockObjects\": [" +
+		// TODO blocks
+		"]," +
+		"\"playerObjects\": [" +
+		// TODO players
+		"]," +
+		"\"actions\": [" +
+		// TODO actons
+		"]," +
+		"}"
+	}
+	
+	def blockToJson(Block block){
+		"{" +
+      	"\"name\": \"B\"," +
+      	"\"imagePath\": \"images/block_wood.png\"," +
+      	"\"position\": {" +
+        	"\"rowIndex\": 0," +
+        	"\"columnIndex\": 0" +
+      		"}" +
+    	"},"
+	}
+	
+	def playerToJson(Player player){
+		"{" +
+      	"\"name\": \"Spieler 1\"," +
+      	"\"imagePath\": \"images/light_tank_red.png\"," +
+      	"\"position\": {" +
+        	"\"rowIndex\": 1," +
+        	"\"columnIndex\": 2" +
+      		"}," +
+      	"\"viewDirection\": 1," +
+      	"\"playerNumber\": 1," +
+      	"\"wonImagePath\": \"images/background_won_red.png\"," +
+      	"\"maxActionPoints\": 6," +
+      	"\"maxHealthPoints\": 3," +
+      	"\"actions\": [" +
+        "{" +
+        	"\"id\": 1" +
+        "}," +
+        "{" +
+          	"\"id\": 2" +
+        "}," +
+        "{" +
+          	"\"id\": 4" +
+        "}" +
+      	"]" +
+    	"},\""
+	}
+	
+	def actionToJson(Action action){
+		"{" +
+      	"\"id\": 1," +
+      	"\"description\": \"Panzer bewegen\"," +
+      	"\"imagePath\": \"images/action_move.png\"," +
+      	"\"soundPath\": \"move.wav\"," +
+      	"\"actionPoints\": 1," +
+      	"\"range\": 1," +
+      	"\"actionType\": 1," +
+      	"\"damage\": 0" +
+    "},"
 	}
 	
 	/**
