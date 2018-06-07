@@ -3,12 +3,19 @@
  */
 package de.htwg.modellgetriebene.generator
 
+import de.htwg.modellgetriebene.pixelTankWarDsl.ActionComponents
 import de.htwg.modellgetriebene.pixelTankWarDsl.Battlefield
+import de.htwg.modellgetriebene.pixelTankWarDsl.Block
+import de.htwg.modellgetriebene.pixelTankWarDsl.BlockType
+import de.htwg.modellgetriebene.pixelTankWarDsl.Direction
 import de.htwg.modellgetriebene.pixelTankWarDsl.Player
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import de.htwg.modellgetriebene.pixelTankWarDsl.ActionType
+import de.htwg.modellgetriebene.pixelTankWarDsl.PlayerActions
 
 /**
  * Generates code from your model files on save.
@@ -34,67 +41,183 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		"\"attackImagePath\": \"images/hit.png\"," +
 		"\"rowCount\": " + battlefield.dimesion.width + "," +
 		"\"colCount\": " + battlefield.dimesion.height + "," +
-		"\"blockObjects\": [" +
-			blockToJson(battlefield) +
-		"]" +
-		"\"playerObjects\": [" +
-			playerToJson(battlefield) +
-		"]" +
-		"\"actions\": [" +
-			actionToJson(battlefield) +
-		"]" +
+		"\"blockObjects\": " +
+			blocksToJson(battlefield.blocks.blocks) +
+		",\"playerObjects\": " +
+			playerToJson(battlefield.players.players) +
+		",\"actions\": " +
+			actionToJson(battlefield.action.action) +
 		"}"
 	}
 	
-	def blockToJson(Battlefield battlefield){
-		"{" +
-      	"\"name\": \"B\"," +
-      	"\"imagePath\": \"images/block_wood.png\"," +
-      	"\"position\": {" +
-        	"\"rowIndex\": 0," +
-        	"\"columnIndex\": 0" +
-      		"}" +
-    	"},"
+	def blocksToJson(EList<Block> blocks){
+		blocks.map[block | 
+			return "{" +
+			      	"\"name\": \"B\"," +
+			      	"\"imagePath\": \"images/"+ blockTypeToString(block.blockType) +"\"," +
+			      	"\"position\": {" +
+			        	"\"rowIndex\": "+ block.location.XPosition + "," +
+			        	"\"columnIndex\": " + block.location.YPosition +
+			      		"}" +
+					"}"
+		]
 	}
 	
-	def playerToJson(Battlefield battlefield){
-		"{" +
-      	"\"name\": \"Spieler 1\"," +
-      	"\"imagePath\": \"images/light_tank_red.png\"," +
-      	"\"position\": {" +
-        	"\"rowIndex\": 1," +
-        	"\"columnIndex\": 2" +
-      		"}," +
-      	"\"viewDirection\": 1," +
-      	"\"playerNumber\": 1," +
-      	"\"wonImagePath\": \"images/background_won_red.png\"," +
-      	"\"maxActionPoints\": 6," +
-      	"\"maxHealthPoints\": 3," +
-      	"\"actions\": [" +
-        "{" +
-        	"\"id\": 1" +
-        "}," +
-        "{" +
-          	"\"id\": 2" +
-        "}," +
-        "{" +
-          	"\"id\": 4" +
-        "}" +
-      	"]" +
-    	"},"
+	def blockTypeToString(BlockType blockType){
+		switch(blockType){
+			case CITY: {
+				"block_city.png"
+			}
+			case CITY_DESERT: {
+				"block_desert_city.png"
+			}
+			case DUNE: {
+				"block_dune.png"
+			}
+			case HELICOPTER: {
+				"block_helicopter_destroyed.png"
+			}
+			case LAKE: {
+				"block_lake.png"
+			}
+			case MOUNTAIN: {
+				"block_mountain.png"
+			}
+			case PALM: {
+				"block_palm.png"
+			}
+			case WOOD: {
+				"block_wood.png"
+			}
+		}
 	}
 	
-	def actionToJson(Battlefield battlefield){
-		"{" +
-      	"\"id\": 1," +
-      	"\"description\": \"Panzer bewegen\"," +
-      	"\"imagePath\": \"images/action_move.png\"," +
-      	"\"soundPath\": \"move.wav\"," +
-      	"\"actionPoints\": 1," +
-      	"\"range\": 1," +
-      	"\"actionType\": 1," +
-      	"\"damage\": 0" +
-    	"},"
+	def playerToJson(EList<Player> players){
+		players.map[player | 
+			return "{" +
+			      	"\"name\": \"Spieler " + players.indexOf(player) + "\"," +
+			      	"\"imagePath\": \"images/light_tank_red.png\"," +
+			      	"\"position\": {" +
+			        	"\"rowIndex\": " + player.location.XPosition + "," +
+			        	"\"columnIndex\": "+ player.location.YPosition +
+			      		"}," +
+			      	"\"viewDirection\": " + playerStartDirectionToString(player.startDirection) + "," +
+			      	"\"playerNumber\": " + players.indexOf(player) + "," +
+			      	"\"wonImagePath\": \"images/background_won_red.png\"," +
+			      	"\"maxActionPoints\": " + player.actionPoints + "," +
+			      	"\"maxHealthPoints\": " + player.healthPoints + "," +
+			      	"\"actions\": " +
+					playerActionsToJson(player.playerActions.playerActions) +
+			    	"}"
+    	]
+	}
+	
+	def playerActionsToJson(EList<ActionType> actions){
+		actions.map[actionType | 
+			return "{" +
+					"\"id\": " + actionId(actionType) +
+					"},"
+		]
+	}
+	
+	def playerStartDirectionToString(Direction direction){
+		switch(direction){
+			case NORTH: {
+				0
+			}
+			case EAST: {
+				1
+			}
+			case SOUTH: {
+				2
+			}
+			case WEST: {
+				3
+			}
+		}
+	}
+	
+	def actionToJson(EList<ActionComponents> actions){
+		actions.map[action | 
+		return "{" +
+			      	"\"id\": " + actionId(action.actionType) + "," +
+			      	"\"description\": \"" + actionDescription(action.actionType) + "\"," +
+			      	"\"imagePath\": \"images/" + actionImage(action.actionType) + "\"," +
+			      	"\"soundPath\": \"move.wav\"," +
+			      	"\"actionPoints\": " + action.costs + "," +
+			      	"\"range\": " + action.range + "," +
+			      	"\"actionType\": " + actionType(action.actionType) + "," +
+			      	"\"damage\": " + action.damage +
+		    	"},"
+    	]
+	}
+	
+	def actionDescription(ActionType actionType){
+		switch(actionType){
+			case MOVE: {
+				"Panzer bewegen"
+			}
+			case SHOOT: {
+				"Schießen"
+			}
+			case ROCKET: {
+				"Rakete abschießen"
+			}
+			case WAIT: {
+				"Warten"
+			}
+		}
+	}
+	
+	def actionId(ActionType actionType){
+		switch(actionType){
+			case MOVE: {
+				1
+			}
+			case SHOOT: {
+				2
+			}
+			case ROCKET: {
+				3
+			}
+			case WAIT: {
+				4
+			}
+		}
+	}
+	
+	def actionImage(ActionType actionType){
+		switch(actionType){
+			case MOVE: {
+				"action_move.png"
+			}
+			case SHOOT: {
+				"action_attack.png"
+			}
+			case ROCKET: {
+				"action_rocket_attack.png"
+			}
+			case WAIT: {
+				"action_wait.png"
+			}
+		}
+	}
+	
+	def actionType(ActionType actionType){
+		switch(actionType){
+			case MOVE: {
+				1
+			}
+			case SHOOT: {
+				0
+			}
+			case ROCKET: {
+				0
+			}
+			case WAIT: {
+				2
+			}
+		}	
 	}
 	
 	/**
