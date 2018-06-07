@@ -23,7 +23,7 @@ Player:
 
 Block: blockType=BlockType 'at' location=Location;
 
-enum BlockType: WOOD | MOUNTAIN | LAKE | CITY;
+enum BlockType: WOOD | MOUNTAIN | LAKE | CITY | CITY_DESERT | HELICOPTER | DUNE | PALM;
 
 Location: xPosition=INT yPosition=INT;
 
