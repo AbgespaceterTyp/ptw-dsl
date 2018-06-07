@@ -10,22 +10,17 @@ Game:
 	'Create' Battlefield;
 	
 Battlefield:
-	'Battlefield' battlefield=ID '{'
-		& 'size' dimesion=Dimension
-		& 'background' background=Background 
-		& 'placeOnField' '{'
-			players=Players
-			blocks=Blocks
-		'}'
-		& 'defineActions' '{'
-			action=Action
-		'}'
-	'}';
-	
+	'Battlefield' battlefield=ID 
+		'withSize' dimesion=Dimension
+		'andBackground' background=Background 
+		'itHas' players=Players blocks=Blocks
+		'theActionsAre' action=Action
+;
+
 
 // Battlefield attributes
 
-Location: xPosition=INT yPosition=INT;
+Location: xPosition=INT ',' yPosition=INT;
 
 Dimension:
 	(width=INT'x'height=INT);
@@ -37,34 +32,35 @@ enum Color:
 
 enum Background:
 	FORREST | DESERT | MOUNTAINS;
-
+	
 
 // Player
 
 Players:
-	('Player' playerOne=Player) &
-	('Player' playerTwo=Player) &
-	('Player' playerThree=Player)? &
-	('Player' playerFour=Player)?;
+	('aPlayer' players+=Player) &
+	('aPlayer' players+=Player) & 
+	('aPlayer' players+=Player)? &
+	('aPlayer' players+=Player)?
+;
 
 Player: 
-	name=ID '{'
+		'named' name=ID
 		'withColor' color=Color
 		'andForce' actionPoints=INT
 		'andHealth' healthPoints=INT
-		'at' location=Location
-		'startsTo' startDirection=Direction
-		'hasActions' playerActions=PlayerActions
-		'}';
+		'whoStartsAtPosition' location=Location
+		'towards' startDirection=Direction
+		'withActions' playerActions=PlayerActions
+;
 
 PlayerActions: {PlayerActions} (playerActions+=ActionType)*;
 
 
 // Blocks
 	
-Blocks: {Blocks} ('Block' blocks+=Block)*;
+Blocks: {Blocks} ('aBlock' blocks+=Block)*;
 
-Block: blockType=BlockType 'at' location=Location;
+Block: 'ofType' blockType=BlockType 'isAtPosition' location=Location;
 
 enum BlockType: WOOD | MOUNTAIN | LAKE | CITY | CITY_DESERT | HELICOPTER | DUNE | PALM;
 
@@ -73,6 +69,6 @@ enum BlockType: WOOD | MOUNTAIN | LAKE | CITY | CITY_DESERT | HELICOPTER | DUNE 
 
 Action: {Action} (action+=ActionComponents)*;
 
-ActionComponents: actionType=ActionType costs=INT range=INT damage=INT;
+ActionComponents: actionType=ActionType 'withCosts' costs=INT 'andRange' range=INT 'andDamage' damage=INT;
 	
 enum ActionType: MOVE | SHOOT | ROCKET | WAIT;
