@@ -45,7 +45,8 @@ Players:
 
 Player: 
 		'named' name=ID
-		'withColor' color=Color
+		'withTank' tankType=TankType
+		'andColor' color=Color
 		'andForce' actionPoints=INT
 		'andHealth' healthPoints=INT
 		'whoStartsAtPosition' location=Location
@@ -55,6 +56,7 @@ Player:
 
 PlayerActions: {PlayerActions} (playerActions+=ActionType)*;
 
+enum TankType: LIGHT | MEDIUM | HEAVY ;
 
 // Blocks
 	

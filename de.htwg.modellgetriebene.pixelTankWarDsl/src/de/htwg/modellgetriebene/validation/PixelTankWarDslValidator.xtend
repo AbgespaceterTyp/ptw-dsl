@@ -3,6 +3,10 @@
  */
 package de.htwg.modellgetriebene.validation
 
+import de.htwg.modellgetriebene.pixelTankWarDsl.Battlefield
+import de.htwg.modellgetriebene.pixelTankWarDsl.Player
+import org.eclipse.xtext.validation.Check
+import de.htwg.modellgetriebene.pixelTankWarDsl.PixelTankWarDslPackage
 
 /**
  * This class contains custom validation rules. 
@@ -11,8 +15,95 @@ package de.htwg.modellgetriebene.validation
  */
 class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 	
-//	public static val INVALID_NAME = 'invalidName'
-//
+	// public static val INVALID_NAME = 'invalidName'
+	public static val DUPLICATE_NAME = 'duplicateName'
+	public static val DUPLICATE_COLOR = 'duplicateColor'
+	// public static val DUPLICATE_COLOR = 'duplicateColor'
+
+	public var Battlefield battlefield
+
+	@Check
+	def checkAndLoadBattlefield(Battlefield bf) {
+		battlefield = bf	
+	}
+
+	@Check
+	def checkPlayerNameNotEmpty(Player player) {
+		battlefield.players.players
+			.groupBy[name]
+			.forEach[p1, p2| 
+			if(player.name.equals(p1) && p2.size() > 1) { 
+				error("Name should be unique", PixelTankWarDslPackage.Literals.PLAYER__NAME, DUPLICATE_NAME)	
+			}
+		];
+		
+		battlefield.players.players
+			.groupBy[color]
+			.forEach[p1, p2| 
+			if(player.color.equals(p1) && p2.size() > 1) { 
+				error("Color should be unique", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)	
+			}
+		];
+	}
+	
+	@Check
+	def check() {
+		
+	}
+
+
+	/*			
+	@Check
+	def void checkColorIsNotAlreadyUsed(Battlefield bf) {
+		while (bf. !== null) {
+	        for (other : bf.players.play) {
+	            if (f.name == other.name) {
+	                error("Feature names have to be unique",
+	                    DomainmodelPackage.Literals.FEATURE__NAME)
+	                return
+	            }
+	        }
+	        superEntity = superEntity.getSuperType();
+	    }
+
+		warning("Name warn", PixelTankWarDslPackage.Literals.PLAYER__NAME)
+
+		var Color one 
+		var Color two 
+		var Color three
+		var Color four
+
+		if(bf.players.playerOne !== null) {
+			one = bf.players.playerOne.color
+		}
+		if(bf.players.playerTwo !== null) {
+			two = bf.players.playerTwo.color	
+		}
+		if(bf.players.playerThree !== null) {
+			three = bf.players.playerThree.color
+		}
+		if(bf.players.playerFour !== null) {
+			four = bf.players.playerFour.color
+		}
+		
+		if(one !== null) {
+			if(player.color === one) error("Color: " + one + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
+		}
+		
+		if(two !== null) {
+			if(player.color === two) error("Color: " + two + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
+		}
+		
+		if(three !== null) {
+			if(player.color === three) error("Color: " + three + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
+		}
+		
+		if(four !== null) {
+			if(player.color === four) error("Color: " + four + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
+		}
+		
+	}
+*/
 //	@Check
 //	def checkGreetingStartsWithCapital(Greeting greeting) {
 //		if (!Character.isUpperCase(greeting.name.charAt(0))) {
@@ -20,6 +111,5 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 //					PixelTankWarDslPackage.Literals.GREETING__NAME,
 //					INVALID_NAME)
 //		}
-//	}
-	
+//	}	
 }
