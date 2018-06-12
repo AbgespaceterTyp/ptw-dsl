@@ -4,6 +4,7 @@
 package de.htwg.modellgetriebene.generator
 
 import de.htwg.modellgetriebene.pixelTankWarDsl.ActionComponents
+import de.htwg.modellgetriebene.pixelTankWarDsl.ActionType
 import de.htwg.modellgetriebene.pixelTankWarDsl.Battlefield
 import de.htwg.modellgetriebene.pixelTankWarDsl.Block
 import de.htwg.modellgetriebene.pixelTankWarDsl.BlockType
@@ -14,8 +15,9 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import de.htwg.modellgetriebene.pixelTankWarDsl.ActionType
-import de.htwg.modellgetriebene.pixelTankWarDsl.PlayerActions
+import de.htwg.modellgetriebene.pixelTankWarDsl.Background
+import de.htwg.modellgetriebene.pixelTankWarDsl.Color
+import de.htwg.modellgetriebene.pixelTankWarDsl.TankType
 
 /**
  * Generates code from your model files on save.
@@ -25,7 +27,7 @@ import de.htwg.modellgetriebene.pixelTankWarDsl.PlayerActions
 class PixelTankWarDslGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		// TODO iterate over battlefields and create for each an own file
+		// Save as UTF 8 without BOM
 		fsa.generateFile(generateFileName(resource), generateContent(resource));
 	}
 	
@@ -33,10 +35,10 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		battlefieldToJson(resource.allContents.filter(Battlefield).head)
 	}
 	
-	def battlefieldToJson(Battlefield battlefield){
+	private def battlefieldToJson(Battlefield battlefield){
 		"{" + 
 		"\"attackSoundPath\": \"sounds/explosion.wav\"," +
- 		"\"levelBackgroundImagePath\": \"images/background_woodlands.png\"," +
+ 		"\"levelBackgroundImagePath\": \"images/" + battlefieldBackgroundToString(battlefield.background) + "\"," +
 		"\"actionbarBackgroundImagePath\": \"images/background_actionbar.png\"," +
 		"\"attackImagePath\": \"images/hit.png\"," +
 		"\"rowCount\": " + battlefield.dimesion.width + "," +
@@ -50,7 +52,21 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		"}"
 	}
 	
-	def blocksToJson(EList<Block> blocks){
+	private def battlefieldBackgroundToString(Background background) {
+		switch(background){
+			case DESERT: {
+				"background_desert.png"
+			}
+			case FORREST: {
+				"background_woodlands.png"
+			}
+			case MOUNTAINS: {
+				"background_woodlands.png"
+			}
+		}
+	}
+	
+	private def blocksToJson(EList<Block> blocks){
 		blocks.map[block | 
 			return "{" +
 			      	"\"name\": \"B\"," +
@@ -63,7 +79,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		]
 	}
 	
-	def blockTypeToString(BlockType blockType){
+	private def blockTypeToString(BlockType blockType){
 		switch(blockType){
 			case CITY: {
 				"block_city.png"
@@ -92,18 +108,18 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def playerToJson(EList<Player> players){
+	private def playerToJson(EList<Player> players){
 		players.map[player | 
 			return "{" +
 			      	"\"name\": \"Spieler " + players.indexOf(player) + "\"," +
-			      	"\"imagePath\": \"images/light_tank_red.png\"," +
+			      	"\"imagePath\": \"images/" + playerTankToString(player.color, player.tankType) + "\"," +
 			      	"\"position\": {" +
 			        	"\"rowIndex\": " + player.location.XPosition + "," +
 			        	"\"columnIndex\": "+ player.location.YPosition +
 			      		"}," +
 			      	"\"viewDirection\": " + playerStartDirectionToString(player.startDirection) + "," +
 			      	"\"playerNumber\": " + players.indexOf(player) + "," +
-			      	"\"wonImagePath\": \"images/background_won_red.png\"," +
+			      	"\"wonImagePath\": \"images/" + playerBackgroundToString(player.color) + "\"," +
 			      	"\"maxActionPoints\": " + player.actionPoints + "," +
 			      	"\"maxHealthPoints\": " + player.healthPoints + "," +
 			      	"\"actions\": " +
@@ -112,7 +128,48 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
     	]
 	}
 	
-	def playerActionsToJson(EList<ActionType> actions){
+	private def playerTankToString(Color tankColor, TankType tankType){
+		switch(tankColor){
+			case RED: {
+				if(TankType.LIGHT.equals(tankType)){
+					"light_tank_red.png"
+				} else if(TankType.MEDIUM.equals(tankType)){
+					"medium_tank_red.png"
+				} else {
+					"heavy_tank_red.png"
+				}
+			}
+			case BLUE: {
+				if(TankType.LIGHT.equals(tankType)){
+					"light_tank_blue.png"
+				} else if(TankType.MEDIUM.equals(tankType)){
+					"medium_tank_blue.png"
+				} else {
+					"heavy_tank_blue.png"
+				}
+			}
+			case BROWN: {
+				if(TankType.LIGHT.equals(tankType)){
+					"light_tank_brown.png"
+				} else if(TankType.MEDIUM.equals(tankType)){
+					"medium_tank_brown.png"
+				} else {
+					"heavy_tank_brown.png"
+				}
+			}
+			case PURPLE: {
+				if(TankType.LIGHT.equals(tankType)){
+					"light_tank_purple.png"
+				} else if(TankType.MEDIUM.equals(tankType)){
+					"medium_tank_purple.png"
+				} else {
+					"heavy_tank_purple.png"
+				}
+			}
+		}
+	}
+	
+	private def playerActionsToJson(EList<ActionType> actions){
 		actions.map[actionType | 
 			return "{" +
 					"\"id\": " + actionId(actionType) +
@@ -120,7 +177,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		]
 	}
 	
-	def playerStartDirectionToString(Direction direction){
+	private def playerStartDirectionToString(Direction direction){
 		switch(direction){
 			case NORTH: {
 				0
@@ -137,7 +194,25 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def actionToJson(EList<ActionComponents> actions){
+	private def playerBackgroundToString(Color tankColor){
+		switch(tankColor){
+			case BLUE: {
+				"background_won_blue.png"
+			}
+			case BROWN: {
+				"background_won_brown.png"
+			}
+			case PURPLE: {
+				"background_won_purple.png"
+			}
+			case RED: {
+				"background_won_red.png"
+
+			}
+		}
+	}
+	
+	private def actionToJson(EList<ActionComponents> actions){
 		actions.map[action | 
 		return "{" +
 			      	"\"id\": " + actionId(action.actionType) + "," +
@@ -148,11 +223,11 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 			      	"\"range\": " + action.range + "," +
 			      	"\"actionType\": " + actionType(action.actionType) + "," +
 			      	"\"damage\": " + action.damage +
-		    	"},"
+		    	"}"
     	]
 	}
 	
-	def actionDescription(ActionType actionType){
+	private def actionDescription(ActionType actionType){
 		switch(actionType){
 			case MOVE: {
 				"Panzer bewegen"
@@ -169,7 +244,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def actionId(ActionType actionType){
+	private def actionId(ActionType actionType){
 		switch(actionType){
 			case MOVE: {
 				1
@@ -186,7 +261,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def actionImage(ActionType actionType){
+	private def actionImage(ActionType actionType){
 		switch(actionType){
 			case MOVE: {
 				"action_move.png"
@@ -203,7 +278,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		}
 	}
 	
-	def actionType(ActionType actionType){
+	private def actionType(ActionType actionType){
 		switch(actionType){
 			case MOVE: {
 				1
@@ -223,7 +298,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 	/**
 	 * Generates a file name for pattern 'G_ScenarioName_(PlayerCount-Player).json'
 	 */
-	def generateFileName(Resource resource){
+	private def generateFileName(Resource resource){
 		"G_" + resource.allContents.filter(Battlefield).head.battlefield + "_(" + resource.allContents.filter(Player).size + "-Player).json"
 	}
 }
