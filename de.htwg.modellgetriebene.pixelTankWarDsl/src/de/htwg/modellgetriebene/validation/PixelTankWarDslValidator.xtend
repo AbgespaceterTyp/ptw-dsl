@@ -7,6 +7,11 @@ import de.htwg.modellgetriebene.pixelTankWarDsl.Battlefield
 import de.htwg.modellgetriebene.pixelTankWarDsl.Player
 import org.eclipse.xtext.validation.Check
 import de.htwg.modellgetriebene.pixelTankWarDsl.PixelTankWarDslPackage
+import java.util.Collection
+import org.eclipse.emf.common.util.EList
+import de.htwg.modellgetriebene.pixelTankWarDsl.Location
+import java.util.List
+import de.htwg.modellgetriebene.pixelTankWarDsl.Block
 
 /**
  * This class contains custom validation rules. 
@@ -22,28 +27,19 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 	public static val ACTION_POINTS_BELOW_ONE = 'actionPointsBelowOne'
 	public static val ACTION_POINTS_TOO_HIGH = 'actionPointsTooHigh'
 	public static val LOCATION_OUT_OF_BOUNDS = 'locationOutOfBounds'
-	public static val DUPLICATE_LOCATION = 'duplicateLocation'
-	//public static val AAAAA = 'Aaaaa'
+	public static val DUPLICATE_LOCATION_PLAYER = 'duplicateLocationPlayer'
+	public static val DUPLICATE_LOCATION_BLOCK = 'duplicateLocationBlock'
 	//public static val AAAAA = 'Aaaaa'
 
-	
 	public var Battlefield battlefield
 
 	@Check
 	def checkAndLoadBattlefield(Battlefield bf) {
 		battlefield = bf
-		
-		// TODO Pruefung aller locations auf uniqueness
-		val playersLocations = battlefield.players.players.map[p1 | return p1.location]
-		val blocksLocations = battlefield.blocks.blocks.map[b1 | return b1.location]
-		
-		val allLocations = playersLocations.clone
-		allLocations.addAll(blocksLocations)
-		
 	}
 
 	@Check
-	def checkPlayer(Player player) {
+	def checkPlayerNameIsUnique(Player player) {
 		battlefield.players.players
 			.groupBy[name]
 			.forEach[p1, p2| 
@@ -51,7 +47,10 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 				error("Name should be unique", PixelTankWarDslPackage.Literals.PLAYER__NAME, DUPLICATE_NAME)	
 			}
 		];
-		
+	}
+	
+	@Check
+	def checkPlayerColorIsUnique(Player player) {
 		battlefield.players.players
 			.groupBy[color]
 			.forEach[p1, p2| 
@@ -59,16 +58,44 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 				error("Color should be unique", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)	
 			}
 		];
+	}
+	
+	@Check
+	def checkPlayersHaveNoOccupiedPosition(Player player) {
+		var playersLocations = battlefield.players.players.map[p | p.location]
+		var blocksLocations = battlefield.blocks.blocks.map[b | b.location]
 		
-		battlefield.players.players
-			.forEach[p1| 
-			if(player != p1 && player.location.XPosition === (p1.location.XPosition) && player.location.YPosition === (p1.location.YPosition)) { 
-				error("Position should be unique", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, DUPLICATE_LOCATION)
-			}
-		];
+		var locations = playersLocations + blocksLocations
 		
+		var locationOccurrences = locations
+			.filter[location | 
+			player.location.XPosition === (location.XPosition) && player.location.YPosition === (location.YPosition)
+			].size() 			
 		
+		if(locationOccurrences > 1) {
+			error("Position should be unique", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, DUPLICATE_LOCATION_PLAYER)		
+		}
+	}
+	
+	@Check
+	def checkBlocksHaveNoOccupiedPosition(Block block) {
+		var playersLocations = battlefield.players.players.map[p | p.location]
+		var blocksLocations = battlefield.blocks.blocks.map[b | b.location]
 		
+		var locations = playersLocations + blocksLocations
+		
+		var locationOccurrences = locations
+			.filter[location | 
+			block.location.XPosition === (location.XPosition) && block.location.YPosition === (location.YPosition)
+			].size()
+		
+		if(locationOccurrences > 1) {
+			error("Position should be unique", PixelTankWarDslPackage.Literals.BLOCK__LOCATION, DUPLICATE_LOCATION_BLOCK)		
+		}
+	}
+
+	@Check
+	def checkPlayerHealthPointsAreInRange(Player player) {
 		if(player.healthPoints < 1) {
 			error("Health points must not be below 1", PixelTankWarDslPackage.Literals.PLAYER__HEALTH_POINTS, HEALTH_POINTS_BELOW_ONE)	
 		}
@@ -76,7 +103,10 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 		if(player.healthPoints > 10) {
 			warning("Health points should be between 1 and 10, otherwise the game takes a long time to finish", PixelTankWarDslPackage.Literals.PLAYER__HEALTH_POINTS, HEALTH_POINTS_TOO_HIGH)
 		}
-		
+	}
+	
+	@Check
+	def checkPlayerActionPointsAreInRange(Player player) {
 		if(player.actionPoints < 1) {
 			error("Action points must not be below 1", PixelTankWarDslPackage.Literals.PLAYER__ACTION_POINTS, ACTION_POINTS_BELOW_ONE)
 		}
@@ -84,16 +114,28 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 		if(player.actionPoints > 10) {
 			warning("Action points should be between 1 and 10, otherwise the game takes a long time to finish", PixelTankWarDslPackage.Literals.PLAYER__ACTION_POINTS, ACTION_POINTS_TOO_HIGH)	
 		}
-		
-		if(player.location.XPosition === 0 || player.location.XPosition > battlefield.dimesion.width) {
-			error("X-Position has to be greater than 0 and within the battlefields width dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+	}
+	
+	@Check
+	def checkPlayerPositionsAreInRange(Player player) {
+		if(player.location.XPosition > battlefield.dimesion.width) {
+			error("X-Position has to within the battlefields width dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
 		}
 		
-		if(player.location.YPosition === 0 || player.location.YPosition > battlefield.dimesion.height) {
-			error("Y-Position has to be greater than 0 and within the battlefields height dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		if(player.location.YPosition > battlefield.dimesion.height) {
+			error("Y-Position has to be within the battlefields height dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		}
+	}
+	
+	@Check
+	def checkBlockPositionsAreInRange(Block block) {
+		if(block.location.XPosition > battlefield.dimesion.width) {
+			error("X-Position has to within the battlefields width dimension", PixelTankWarDslPackage.Literals.BLOCK__LOCATION, LOCATION_OUT_OF_BOUNDS)
 		}
 		
-		
+		if(block.location.YPosition > battlefield.dimesion.height) {
+			error("Y-Position has to be within the battlefields height dimension", PixelTankWarDslPackage.Literals.BLOCK__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		}
 	}
 	
 	@Check
