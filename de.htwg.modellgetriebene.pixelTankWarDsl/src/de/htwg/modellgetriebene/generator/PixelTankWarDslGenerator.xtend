@@ -18,6 +18,7 @@ import org.eclipse.xtext.generator.IGeneratorContext
 import de.htwg.modellgetriebene.pixelTankWarDsl.Background
 import de.htwg.modellgetriebene.pixelTankWarDsl.Color
 import de.htwg.modellgetriebene.pixelTankWarDsl.TankType
+import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Generates code from your model files on save.
@@ -27,7 +28,8 @@ import de.htwg.modellgetriebene.pixelTankWarDsl.TankType
 class PixelTankWarDslGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		// Save as UTF 8 without BOM
+		resource.load(#{XtextResource.OPTION_ENCODING -> "UTF-8"})
+		
 		fsa.generateFile(generateFileName(resource), generateContent(resource));
 	}
 	
@@ -173,7 +175,7 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 		actions.map[actionType | 
 			return "{" +
 					"\"id\": " + actionId(actionType) +
-					"},"
+					"}"
 		]
 	}
 	
@@ -233,10 +235,10 @@ class PixelTankWarDslGenerator extends AbstractGenerator {
 				"Panzer bewegen"
 			}
 			case SHOOT: {
-				"Schießen"
+				"Schiessen"
 			}
 			case ROCKET: {
-				"Rakete abschießen"
+				"Rakete abschiessen"
 			}
 			case WAIT: {
 				"Warten"
