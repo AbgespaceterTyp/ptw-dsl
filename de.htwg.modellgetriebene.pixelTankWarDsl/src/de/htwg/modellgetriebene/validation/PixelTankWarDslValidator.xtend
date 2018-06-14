@@ -3,15 +3,13 @@
  */
 package de.htwg.modellgetriebene.validation
 
+import de.htwg.modellgetriebene.pixelTankWarDsl.ActionComponents
 import de.htwg.modellgetriebene.pixelTankWarDsl.Battlefield
-import de.htwg.modellgetriebene.pixelTankWarDsl.Player
-import org.eclipse.xtext.validation.Check
-import de.htwg.modellgetriebene.pixelTankWarDsl.PixelTankWarDslPackage
-import java.util.Collection
-import org.eclipse.emf.common.util.EList
-import de.htwg.modellgetriebene.pixelTankWarDsl.Location
-import java.util.List
 import de.htwg.modellgetriebene.pixelTankWarDsl.Block
+import de.htwg.modellgetriebene.pixelTankWarDsl.PixelTankWarDslPackage
+import de.htwg.modellgetriebene.pixelTankWarDsl.Player
+import de.htwg.modellgetriebene.pixelTankWarDsl.impl.PixelTankWarDslPackageImpl
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
@@ -29,13 +27,22 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 	public static val LOCATION_OUT_OF_BOUNDS = 'locationOutOfBounds'
 	public static val DUPLICATE_LOCATION_PLAYER = 'duplicateLocationPlayer'
 	public static val DUPLICATE_LOCATION_BLOCK = 'duplicateLocationBlock'
-	//public static val AAAAA = 'Aaaaa'
+	public static val BATTLEFIELD_TOO_SMALL = 'battleieldTooSmall'
+	public static val PLAYER_DUPLICATE_ACTION = 'playerDuplicateAction'
+	public static val DUPLICATE_ACTION = 'duplicateAction'
 
-	public var Battlefield battlefield
+	private var Battlefield battlefield
 
 	@Check
-	def checkAndLoadBattlefield(Battlefield bf) {
+	def loadBattlefield(Battlefield bf) {
 		battlefield = bf
+	}
+	
+	@Check
+	def checkBattlefieldDimensions(Battlefield bf) {
+		if(battlefield.dimesion.height < 1 || battlefield.dimesion.width < 1) {
+			error("Height and Width have to be greater than 0", PixelTankWarDslPackage.Literals.BATTLEFIELD__DIMESION, BATTLEFIELD_TOO_SMALL)
+		}
 	}
 
 	@Check
@@ -59,7 +66,7 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 			}
 		];
 	}
-	
+
 	@Check
 	def checkPlayersHaveNoOccupiedPosition(Player player) {
 		var playersLocations = battlefield.players.players.map[p | p.location]
@@ -139,69 +146,23 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 	}
 	
 	@Check
-	def check() {
+	def checkPlayerHasNoDuplicateActions(Player player) {
+		val epackage = EPackages.get(0) as PixelTankWarDslPackageImpl
 		
+		epackage
+			.actionType
+			.ELiterals
+			.forEach[actionType | { 
+				if(player.playerActions.playerActions.filter[action | action.name() === actionType.name].size() > 1) {
+					error("An action has to be assigned only once", PixelTankWarDslPackage.Literals.PLAYER__PLAYER_ACTIONS, PLAYER_DUPLICATE_ACTION)
+				}
+			}]
 	}
-
-
-	/*			
+	
 	@Check
-	def void checkColorIsNotAlreadyUsed(Battlefield bf) {
-		while (bf. !== null) {
-	        for (other : bf.players.play) {
-	            if (f.name == other.name) {
-	                error("Feature names have to be unique",
-	                    DomainmodelPackage.Literals.FEATURE__NAME)
-	                return
-	            }
-	        }
-	        superEntity = superEntity.getSuperType();
-	    }
-
-		warning("Name warn", PixelTankWarDslPackage.Literals.PLAYER__NAME)
-
-		var Color one 
-		var Color two 
-		var Color three
-		var Color four
-
-		if(bf.players.playerOne !== null) {
-			one = bf.players.playerOne.color
+	def checkNoDuplicateDefinedActions(ActionComponents actionComponents) {
+		if(battlefield.action.action.filter[action | action.actionType.name() === actionComponents.actionType.name()].size() > 1) {
+			error("An action has to be defined only once", PixelTankWarDslPackage.Literals.ACTION_COMPONENTS__ACTION_TYPE, DUPLICATE_ACTION)
 		}
-		if(bf.players.playerTwo !== null) {
-			two = bf.players.playerTwo.color	
-		}
-		if(bf.players.playerThree !== null) {
-			three = bf.players.playerThree.color
-		}
-		if(bf.players.playerFour !== null) {
-			four = bf.players.playerFour.color
-		}
-		
-		if(one !== null) {
-			if(player.color === one) error("Color: " + one + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
-		}
-		
-		if(two !== null) {
-			if(player.color === two) error("Color: " + two + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
-		}
-		
-		if(three !== null) {
-			if(player.color === three) error("Color: " + three + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
-		}
-		
-		if(four !== null) {
-			if(player.color === four) error("Color: " + four + " should not be used more than once", PixelTankWarDslPackage.Literals.PLAYER__COLOR, DUPLICATE_COLOR)
-		}
-		
-	}
-*/
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					PixelTankWarDslPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}	
+	}	
 }
