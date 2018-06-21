@@ -125,23 +125,29 @@ class PixelTankWarDslValidator extends AbstractPixelTankWarDslValidator {
 	
 	@Check
 	def checkPlayerPositionsAreInRange(Player player) {
-		if(player.location.XPosition > battlefield.dimesion.width) {
-			error("X-Position has to within the battlefields width dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		var maxX = battlefield.dimesion.width - 1
+		var maxY = battlefield.dimesion.height - 1
+		
+		if(player.location.XPosition > maxX) {
+			error("X-Position has to within the battlefields width dimension. The Range is from 0 to " + maxX, PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
 		}
 		
-		if(player.location.YPosition > battlefield.dimesion.height) {
-			error("Y-Position has to be within the battlefields height dimension", PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		if(player.location.YPosition > maxY) {
+			error("Y-Position has to be within the battlefields height dimension. The Range is from 0 to " + maxY, PixelTankWarDslPackage.Literals.PLAYER__LOCATION, LOCATION_OUT_OF_BOUNDS)
 		}
 	}
 	
 	@Check
 	def checkBlockPositionsAreInRange(Block block) {
-		if(block.location.XPosition > battlefield.dimesion.width) {
-			error("X-Position has to within the battlefields width dimension", PixelTankWarDslPackage.Literals.BLOCK__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		var maxX = battlefield.dimesion.width - 1
+		var maxY = battlefield.dimesion.height - 1
+		
+		if(block.location.XPosition > maxX) {
+			error("X-Position has to within the battlefields width dimension. The Range is from 0 to " + maxX, PixelTankWarDslPackage.Literals.BLOCK__LOCATION, LOCATION_OUT_OF_BOUNDS)
 		}
 		
-		if(block.location.YPosition > battlefield.dimesion.height) {
-			error("Y-Position has to be within the battlefields height dimension", PixelTankWarDslPackage.Literals.BLOCK__LOCATION, LOCATION_OUT_OF_BOUNDS)
+		if(block.location.YPosition > maxY) {
+			error("Y-Position has to be within the battlefields height dimension. The Range is from 0 to " + maxY, PixelTankWarDslPackage.Literals.BLOCK__LOCATION, LOCATION_OUT_OF_BOUNDS)
 		}
 	}
 	
